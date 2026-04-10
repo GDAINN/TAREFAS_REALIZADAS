@@ -83,3 +83,17 @@ def atualizar(id: int, status: Status): #Aqui você está chamando a função.
     conexão.close()
 
     return {"message": "Tarefa atualizada com sucesso."}  
+
+@app.delete("/deletar/{id}")
+def deletar_tarefa(id:int):
+    conexão = conectar() #Essa função normalmente faz a conexão com o banco SQLite
+    cursor = conexão.cursor() #O cursor é quem executa comandos SQL no banco
+    cursor.execute("DELETE FROM Tarefas WHERE id= ?", (id,)) #Aqui você está executando um comando SQL para deletar a tarefa com o ID fornecido. O ID é passado como um parâmetro para evitar problemas de injeção de SQL.
+    if not cursor.rowcount:  #Se o número de linhas afetadas for zero, significa que a tarefa com o ID fornecido não foi encontrada, e você levanta uma exceção HTTP 404.
+        conexão.close()  #Fecha a conexão com o banco.
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada.")
+    
+    conexão.commit()
+    conexão.close()
+
+    return {"message": "Tarefa deletada com sucesso."}
